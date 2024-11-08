@@ -1,5 +1,6 @@
 package com.example.back.user.controller;
 
+import com.example.back.user.dto.LoginDTO;
 import com.example.back.user.dto.SignupDTO;
 import com.example.back.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,5 +20,10 @@ public class UserController {
     @PostMapping("/signup")
     public String signup(@RequestBody SignupDTO signupDTO) {
         return userService.signup(signupDTO);
+    }
+
+    @PostMapping("/login")
+    public String login(@RequestBody LoginDTO loginDTO) {
+        return userService.login(loginDTO);
     }
 }

@@ -5,8 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SignupDTO {
-    private String userName; //이름
+public class LoginDTO {
     private String userPassword; // 비밀번호
     private String userEmail; //이메일
 }

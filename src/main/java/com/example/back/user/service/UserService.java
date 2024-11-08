@@ -1,5 +1,6 @@
 package com.example.back.user.service;
 
+import com.example.back.user.dto.LoginDTO;
 import com.example.back.user.dto.SignupDTO;
 import com.example.back.user.entity.User;
 import com.example.back.user.repository.UserRepository;
@@ -37,6 +38,19 @@ public class UserService {
         userRepository.save(newUser);
         return "회원가입이 성공적으로 완료되었습니다.";
     }
+
+    public String login(LoginDTO loginDTO) {
+        // 이메일로 사용자 검색
+        User user = userRepository.findByUserEmail(loginDTO.getUserEmail());
+        if (user == null) {
+            return "이메일이 존재하지 않습니다.";
+        }
+
+        // 비밀번호 확인
+        if (passwordEncoder.matches(loginDTO.getUserPassword(), user.getUserPassword())) {
+            return "로그인 성공";
+        } else {
+            return "비밀번호가 일치하지 않습니다.";
+        }
+    }
 }
-
-
