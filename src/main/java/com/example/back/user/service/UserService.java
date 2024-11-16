@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -15,9 +17,9 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.passwordEncoder = passwordEncoder;
     }
 
     public String signup(SignupDTO signupDTO) {
@@ -41,10 +43,12 @@ public class UserService {
 
     public String login(LoginDTO loginDTO) {
         // 이메일로 사용자 검색
-        User user = userRepository.findByUserEmail(loginDTO.getUserEmail());
-        if (user == null) {
+        Optional<User> optionalUser = userRepository.findByUserEmail(loginDTO.getUserEmail());
+        if (optionalUser.isEmpty()) {
             return "이메일이 존재하지 않습니다.";
         }
+
+        User user = optionalUser.get();
 
         // 비밀번호 확인
         if (passwordEncoder.matches(loginDTO.getUserPassword(), user.getUserPassword())) {

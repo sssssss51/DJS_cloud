@@ -29,7 +29,7 @@ dependencies {
     implementation 'org.springframework.security:spring-security-crypto' // BCryptPasswordEncoder 사용을 위한 의존성 추가
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.h2database:h2'
+    // runtimeOnly 'com.h2database:h2'  // H2 데이터베이스 의존성 주석 처리
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
