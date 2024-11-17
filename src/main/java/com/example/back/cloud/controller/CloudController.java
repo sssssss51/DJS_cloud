@@ -1,7 +1,9 @@
 package com.example.back.cloud.controller;
 
+import com.example.back.cloud.dto.FolderFileUploadDTO;
 import com.example.back.cloud.service.CloudService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,23 +21,32 @@ public class CloudController {
         this.cloudService = cloudService;
     }
 
-    // 파일 업로드 엔드포인트
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    // 폴더 지정 파일 업로드 엔드포인트 (DTO 사용)
+    @PostMapping("/uploadToFolder")
+    public ResponseEntity<String> uploadFileToFolder(@ModelAttribute FolderFileUploadDTO folderFileUploadDTO) {
         try {
-            cloudService.uploadAndCompressFile(file);
-            return ResponseEntity.ok("File uploaded and compressed successfully.");
+            // DTO에서 데이터 가져오기
+            String folderName = folderFileUploadDTO.getFolderName();
+            MultipartFile file = folderFileUploadDTO.getFile();
+
+            // 서비스 호출
+            cloudService.uploadFileToFolder(folderName, file);
+            return ResponseEntity.ok("File uploaded successfully to folder: " + folderName);
         } catch (IOException e) {
-            return ResponseEntity.status(500).body("Failed to upload and compress file: " + e.getMessage());
+            return ResponseEntity.status(500).body("Failed to upload file to folder: " + e.getMessage());
         }
     }
 
-    // 파일 다운로드 엔드포인트
-    @GetMapping("/download/{filename}")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable String filename) {
+    // 폴더 내 파일 다운로드 엔드포인트 (변경 없음)
+    @GetMapping("/download")
+    public ResponseEntity<byte[]> downloadFile(
+            @RequestParam("folderName") String folderName,
+            @RequestParam("fileName") String fileName) {
         try {
-            byte[] fileData = cloudService.downloadAndDecompressFile(filename);
-            return ResponseEntity.ok(fileData);
+            byte[] fileData = cloudService.downloadFileFromFolder(folderName, fileName);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+            return ResponseEntity.ok().headers(headers).body(fileData);
         } catch (IOException e) {
             return ResponseEntity.status(500).body(null);
         }

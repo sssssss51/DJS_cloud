@@ -22,15 +22,19 @@ public class CloudEntity {
     @Column(nullable = false)
     private String filePath;
 
+    @Column(nullable = false)
+    private String folderName; // 폴더 이름 필드 추가
+
     // 기본 생성자
     public CloudEntity() {
     }
 
     // 모든 필드를 포함한 생성자
-    public CloudEntity(String filename, long fileSize, String filePath) {
+    public CloudEntity(String filename, long fileSize, String filePath, String folderName) {
         this.filename = filename;
         this.fileSize = fileSize;
         this.filePath = filePath;
+        this.folderName = folderName;
     }
 
     // Getter 및 Setter
@@ -66,6 +70,14 @@ public class CloudEntity {
         this.filePath = filePath;
     }
 
+    public String getFolderName() {
+        return folderName;
+    }
+
+    public void setFolderName(String folderName) {
+        this.folderName = folderName;
+    }
+
     // 디버깅을 위한 toString 메서드
     @Override
     public String toString() {
@@ -74,6 +86,7 @@ public class CloudEntity {
                 ", filename='" + filename + '\'' +
                 ", fileSize=" + fileSize +
                 ", filePath='" + filePath + '\'' +
+                ", folderName='" + folderName + '\'' +
                 '}';
     }
 }
