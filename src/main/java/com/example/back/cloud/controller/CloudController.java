@@ -4,6 +4,7 @@ import com.example.back.cloud.dto.FolderFileUploadDTO;
 import com.example.back.cloud.service.CloudService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,7 +38,7 @@ public class CloudController {
         }
     }
 
-    // 폴더 내 파일 다운로드 엔드포인트 (변경 없음)
+    // 폴더 내 파일 다운로드 엔드포인트
     @GetMapping("/download")
     public ResponseEntity<byte[]> downloadFile(
             @RequestParam("folderName") String folderName,
@@ -49,6 +50,30 @@ public class CloudController {
             return ResponseEntity.ok().headers(headers).body(fileData);
         } catch (IOException e) {
             return ResponseEntity.status(500).body(null);
+        }
+    }
+
+    // 폴더 내 파일 삭제 엔드포인트
+    @DeleteMapping("/deleteFile")
+    public ResponseEntity<String> deleteFile(
+            @RequestParam("folderName") String folderName,
+            @RequestParam("fileName") String fileName) {
+        boolean isDeleted = cloudService.deleteFile(folderName, fileName);
+        if (isDeleted) {
+            return ResponseEntity.ok("File deleted successfully: " + fileName);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found: " + fileName);
+        }
+    }
+
+    // 폴더 삭제 엔드포인트
+    @DeleteMapping("/deleteFolder")
+    public ResponseEntity<String> deleteFolder(@RequestParam("folderName") String folderName) {
+        boolean isDeleted = cloudService.deleteFolder(folderName);
+        if (isDeleted) {
+            return ResponseEntity.ok("Folder deleted successfully: " + folderName);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Folder not found: " + folderName);
         }
     }
 }

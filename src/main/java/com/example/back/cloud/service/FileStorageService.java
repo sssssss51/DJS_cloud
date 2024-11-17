@@ -1,8 +1,8 @@
 package com.example.back.cloud.service;
 
 import org.springframework.stereotype.Service;
+
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,29 +29,52 @@ public class FileStorageService {
     // 파일 저장 메서드
     public void storeFile(String originalFilename, byte[] compressedData) throws IOException {
         Path filePath = Paths.get(storageDirectory, originalFilename);
-        try (FileOutputStream outputStream = new FileOutputStream(filePath.toFile())) {
-            outputStream.write(compressedData);
-        }
+        Files.write(filePath, compressedData);
     }
 
     // 파일 읽기 메서드
     public byte[] retrieveFile(String filename) throws IOException {
-        Path path = Paths.get(storageDirectory, filename);
-        return Files.readAllBytes(path);
+        Path filePath = Paths.get(storageDirectory, filename);
+        if (!Files.exists(filePath)) {
+            throw new IOException("File not found: " + filename);
+        }
+        return Files.readAllBytes(filePath);
     }
 
-    // 폴더를 생성하고 파일 저장 메서드
+    // 폴더 생성 및 파일 저장 메서드
     public void storeFileInFolder(String folderName, String originalFilename, byte[] data) throws IOException {
-        // 폴더 경로 설정
         Path folderPath = Paths.get(storageDirectory, folderName);
-        // 폴더가 없으면 생성
         if (!Files.exists(folderPath)) {
             Files.createDirectories(folderPath);
         }
-        // 파일 저장 경로 설정
         Path filePath = folderPath.resolve(originalFilename);
-        try (FileOutputStream outputStream = new FileOutputStream(filePath.toFile())) {
-            outputStream.write(data);
+        Files.write(filePath, data);
+    }
+
+    // 특정 파일 삭제 메서드
+    public boolean deleteFile(String folderName, String fileName) {
+        Path filePath = Paths.get(storageDirectory, folderName, fileName);
+        try {
+            return Files.deleteIfExists(filePath); // 파일 삭제 성공 시 true 반환
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file: " + filePath, e);
+        }
+    }
+
+    // 폴더 및 모든 하위 파일 삭제 메서드
+    public boolean deleteFolder(String folderName) {
+        Path folderPath = Paths.get(storageDirectory, folderName);
+        try {
+            if (Files.exists(folderPath)) {
+                Files.walk(folderPath) // 하위 파일과 폴더를 모두 순회
+                        .sorted((a, b) -> b.compareTo(a)) // 하위 파일부터 삭제
+                        .map(Path::toFile)
+                        .forEach(File::delete); // 파일과 폴더 삭제
+                return true; // 삭제 성공
+            }
+            return false; // 폴더가 없을 경우 false 반환
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete folder: " + folderPath, e);
         }
     }
 }
