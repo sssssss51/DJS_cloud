@@ -9,7 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Service
-public class FileStorageService {
+public class
+FileStorageService {
 
     private final String storageDirectory = "./uploaded_files";
 
