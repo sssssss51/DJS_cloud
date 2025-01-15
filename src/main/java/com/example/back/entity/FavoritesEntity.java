@@ -13,14 +13,14 @@ public class FavoritesEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
+    // 사용자 정보와 다대일 관계를 정의합니다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId", nullable = false) // 외래 키 userId를 참조
+    private User user;
 
-    @Column(nullable = false)
-    private Long fileId; // 파일 ID 참조
-
-    @ManyToOne
-    @JoinColumn(name = "fileId", insertable = false, updatable = false)
+    // 파일 정보와 다대일 관계를 정의합니다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fileId", nullable = false) // 외래 키 fileId를 참조
     private CloudEntity file;
 
 }

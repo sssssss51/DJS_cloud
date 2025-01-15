@@ -3,25 +3,38 @@ package com.example.back.cloud.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+// DTO 클래스는 요청(Request) 또는 응답(Response)에 사용됩니다.
+// 데이터를 명확히 구분하고 유효성을 검증합니다.
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 @Getter
 @Setter
 public class CloudDto {
-    // Add fields relevant for cloud file handling, e.g., filename, file size, status
-    private String filename;
-    private long fileSize;
-    private String status;
 
-    // Constructors
+    @NotNull(message = "파일 이름은 필수 입력 값입니다.")
+    @Size(min = 1, max = 255, message = "파일 이름은 1자 이상, 255자 이하로 입력해야 합니다.")
+    private String filename; // 파일 이름
+
+    @NotNull(message = "파일 크기는 필수 입력 값입니다.")
+    private long fileSize; // 파일 크기 (바이트 단위)
+
+    @NotNull(message = "파일 상태는 필수 입력 값입니다.")
+    @Size(min = 1, max = 50, message = "상태 값은 1자 이상, 50자 이하로 입력해야 합니다.")
+    private String status; // 파일 상태 (e.g., "Available", "Deleted")
+
+    // 기본 생성자
     public CloudDto() {
     }
 
+    // 모든 필드를 포함한 생성자
     public CloudDto(String filename, long fileSize, String status) {
         this.filename = filename;
         this.fileSize = fileSize;
         this.status = status;
     }
 
-    // toString method for debugging
+    // 디버깅을 위한 toString 메서드
     @Override
     public String toString() {
         return "CloudDto{" +

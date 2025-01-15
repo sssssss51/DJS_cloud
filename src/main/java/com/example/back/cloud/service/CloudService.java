@@ -3,6 +3,7 @@ package com.example.back.cloud.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.example.back.cloud.utils.FileCompressionUtil;
 import com.example.back.cloud.dto.CloudDto;
@@ -76,16 +77,13 @@ public class CloudService {
     }
 
     // 파일을 휴지통으로 이동
+    @Transactional
     public void moveToTrash(Long fileId) {
-        Optional<CloudEntity> fileOptional = cloudRepository.findById(fileId);
-        if (fileOptional.isPresent()) {
-            CloudEntity file = fileOptional.get();
-            file.setDeleted(true);
-            file.setDeletedAt(LocalDateTime.now());
-            cloudRepository.save(file);
-        } else {
-            throw new RuntimeException("File not found.");
-        }
+        CloudEntity file = cloudRepository.findById(fileId)
+                .orElseThrow(() -> new RuntimeException("Entity not found for ID: " + fileId));
+        file.setDeleted(true);
+        file.setDeletedAt(LocalDateTime.now());
+        cloudRepository.save(file);
     }
 
     // 휴지통 파일 목록 조회
@@ -97,17 +95,18 @@ public class CloudService {
     }
 
     // 휴지통 파일 영구 삭제
+    @Transactional
     public boolean permanentlyDeleteFile(Long fileId) {
-        Optional<CloudEntity> fileOptional = cloudRepository.findById(fileId);
-        if (fileOptional.isPresent()) {
-            cloudRepository.deleteById(fileId);
-            return true;
+        if (!cloudRepository.existsById(fileId)) {
+            throw new RuntimeException("File not found for ID: " + fileId);
         }
-        return false;
+        cloudRepository.deleteById(fileId);
+        return true;
     }
 
     // 1주일 지난 휴지통 파일 자동 삭제
     @Scheduled(cron = "0 0 0 * * ?") // 매일 자정 실행
+    @Transactional
     public void deleteExpiredTrashFiles() {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusWeeks(1);
         List<CloudEntity> expiredFiles = cloudRepository.findExpiredTrashFiles(oneWeekAgo);

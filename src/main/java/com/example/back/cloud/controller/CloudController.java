@@ -20,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/cloud")
+// 클라우드 파일 관련 요청을 처리하는 컨트롤러 클래스입니다.
 public class CloudController {
 
     private final CloudService cloudService;
@@ -31,8 +32,7 @@ public class CloudController {
         this.favoritesService = favoritesService;
     }
 
-    // 기존 메서드들 (생략)
-
+    // 휴지통 파일 조회
     @Operation(summary = "휴지통 파일 조회", description = "사용자의 휴지통에 있는 파일 목록을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "휴지통 조회 성공"),
@@ -47,6 +47,7 @@ public class CloudController {
         return ResponseEntity.ok(trashFiles);
     }
 
+    // 휴지통 파일 영구 삭제
     @Operation(summary = "휴지통 파일 영구 삭제", description = "휴지통에서 파일을 영구적으로 삭제합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "파일 영구 삭제 성공"),
@@ -59,5 +60,12 @@ public class CloudController {
             return ResponseEntity.ok("File permanently deleted.");
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found in trash.");
+    }
+
+    // 추가 예외 처리 메서드
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleExceptions(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("An error occurred: " + ex.getMessage());
     }
 }

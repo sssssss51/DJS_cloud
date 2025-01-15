@@ -9,8 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Service
-public class
-FileStorageService {
+public class FileStorageService {
 
     private final String storageDirectory = "./uploaded_files";
 
@@ -58,7 +57,7 @@ FileStorageService {
         try {
             return Files.deleteIfExists(filePath); // 파일 삭제 성공 시 true 반환
         } catch (IOException e) {
-            throw new RuntimeException("Failed to delete file: " + filePath, e);
+            throw new RuntimeException("Failed to delete file: " + filePath + ". Error: " + e.getMessage(), e);
         }
     }
 
@@ -75,7 +74,7 @@ FileStorageService {
             }
             return false; // 폴더가 없을 경우 false 반환
         } catch (IOException e) {
-            throw new RuntimeException("Failed to delete folder: " + folderPath, e);
+            throw new RuntimeException("Failed to delete folder: " + folderPath + ". Error: " + e.getMessage(), e);
         }
     }
 }
