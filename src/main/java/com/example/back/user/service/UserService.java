@@ -1,5 +1,3 @@
-// 수정 및 추가된 주석이 포함된 버전입니다.
-
 package com.example.back.user.service;
 
 import com.example.back.entity.User;
@@ -10,8 +8,11 @@ import com.example.back.user.dto.UserUpdateDTO;
 import com.example.back.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -35,13 +36,11 @@ public class UserService {
     public String signup(SignupDTO signupDTO) {
         logger.info("회원가입 요청 처리 시작: {}", signupDTO.getUserEmail());
 
-        // 이메일 중복 체크
         if (userRepository.existsByUserEmail(signupDTO.getUserEmail())) {
             logger.warn("회원가입 실패: 이미 존재하는 이메일 - {}", signupDTO.getUserEmail());
             return "이미 존재하는 이메일입니다.";
         }
 
-        // 새로운 사용자 생성
         String encodedPassword = passwordEncoder.encode(signupDTO.getUserPassword());
         User newUser = new User();
         newUser.setUserName(signupDTO.getUserName());
@@ -114,7 +113,7 @@ public class UserService {
         return "회원정보 수정이 완료되었습니다.";
     }
 
-    // 회원 탈퇴
+    // 회원 탈퇴 (30일 대기)
     public String deleteAccount(String userEmail) {
         logger.info("회원 탈퇴 요청: {}", userEmail);
 
@@ -124,8 +123,21 @@ public class UserService {
                     return new RuntimeException("사용자를 찾을 수 없습니다.");
                 });
 
-        userRepository.delete(user);
-        logger.info("회원 탈퇴 성공: {}", userEmail);
-        return "회원탈퇴가 완료되었습니다.";
+        user.setDeleted(true);
+        user.setDeletedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        logger.info("회원 탈퇴 상태로 변경: {}", userEmail);
+        return "회원탈퇴가 요청되었으며, 30일 후에 계정이 영구 삭제됩니다.";
+    }
+
+    // 30일 이상 된 계정 삭제 (스케줄러)
+    @Scheduled(cron = "0 0 0 * * ?") // 매일 자정 실행
+    public void deleteScheduledAccounts() {
+        LocalDateTime thresholdDate = LocalDateTime.now().minusDays(30);
+        List<User> usersToDelete = userRepository.findAllByIsDeletedTrueAndDeletedAtBefore(thresholdDate);
+
+        userRepository.deleteAll(usersToDelete);
+        logger.info("30일 이상 지난 {}개의 계정을 영구 삭제하였습니다.", usersToDelete.size());
     }
 }
