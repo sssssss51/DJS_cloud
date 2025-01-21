@@ -23,15 +23,20 @@ public class FolderFileUploadDTO {
     @NotNull(message = "파일 크기는 필수 입력 값입니다.")
     private long fileSize; // 파일 크기 (바이트 단위)
 
+    // 폴더 이름 변경 시 사용될 필드
+    @Size(min = 1, max = 255, message = "새 폴더 이름은 1자 이상, 255자 이하로 입력해야 합니다.")
+    private String newFolderName; // 변경할 새 폴더 이름
+
     // 기본 생성자
     public FolderFileUploadDTO() {
     }
 
     // 모든 필드를 포함한 생성자
-    public FolderFileUploadDTO(String folderName, String filename, long fileSize) {
+    public FolderFileUploadDTO(String folderName, String filename, long fileSize, String newFolderName) {
         this.folderName = folderName;
         this.filename = filename;
         this.fileSize = fileSize;
+        this.newFolderName = newFolderName;
     }
 
     // 디버깅을 위한 toString 메서드
@@ -41,6 +46,7 @@ public class FolderFileUploadDTO {
                 "folderName='" + folderName + '\'' +
                 ", filename='" + filename + '\'' +
                 ", fileSize=" + fileSize +
+                ", newFolderName='" + newFolderName + '\'' +
                 '}';
     }
 }

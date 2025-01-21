@@ -112,4 +112,23 @@ public class CloudService {
         List<CloudEntity> expiredFiles = cloudRepository.findExpiredTrashFiles(oneWeekAgo);
         cloudRepository.deleteAll(expiredFiles);
     }
+
+    // 폴더 이름 변경 메서드
+    @Transactional
+    public boolean renameFolder(String oldFolderName, String newFolderName) {
+        // 기존 폴더 이름으로 파일 검색
+        List<CloudEntity> entities = cloudRepository.findCloudEntitiesByFolderName(oldFolderName);
+
+        if (entities.isEmpty()) {
+            throw new RuntimeException("Folder not found: " + oldFolderName);
+        }
+
+        // 새 폴더 이름으로 업데이트
+        try {
+            cloudRepository.updateFolderName(oldFolderName, newFolderName);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to rename folder: " + e.getMessage(), e);
+        }
+    }
 }

@@ -77,4 +77,30 @@ public class FileStorageService {
             throw new RuntimeException("Failed to delete folder: " + folderPath + ". Error: " + e.getMessage(), e);
         }
     }
+
+    // 폴더 이름 변경 메서드
+    public boolean renameFolder(String oldFolderName, String newFolderName) {
+        Path oldFolderPath = Paths.get(storageDirectory, oldFolderName); // 기존 폴더 경로
+        Path newFolderPath = Paths.get(storageDirectory, newFolderName); // 새 폴더 경로
+
+        // 기존 폴더가 존재하는지 확인
+        if (!Files.exists(oldFolderPath)) {
+            throw new RuntimeException("폴더를 찾을 수 없습니다: " + oldFolderName);
+        }
+
+        // 새 폴더 이름이 이미 존재하는지 확인
+        if (Files.exists(newFolderPath)) {
+            throw new RuntimeException("새 폴더 이름이 이미 존재합니다: " + newFolderName);
+        }
+
+        try {
+            // 폴더 이름 변경
+            Files.move(oldFolderPath, newFolderPath);
+            return true; // 성공 시 true 반환
+        } catch (IOException e) {
+            // 예외 발생 시 메시지와 함께 RuntimeException으로 변환
+            throw new RuntimeException("폴더 이름 변경 실패: " + oldFolderName + " -> " + newFolderName
+                    + ". 에러: " + e.getMessage(), e);
+        }
+    }
 }

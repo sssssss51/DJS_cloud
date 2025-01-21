@@ -42,4 +42,13 @@ public interface CloudRepository extends JpaRepository<CloudEntity, Long> {
      * @return 해당 사용자 ID에 속한 삭제된 CloudEntity 리스트
      */
     List<CloudEntity> findDeletedFilesByUserId(Long userId);
+
+    /**
+     * 폴더 이름 변경
+     * @param oldFolderName 기존 폴더 이름
+     * @param newFolderName 새 폴더 이름
+     */
+    @Query("UPDATE CloudEntity c SET c.folderName = :newFolderName WHERE c.folderName = :oldFolderName")
+    void updateFolderName(@Param("oldFolderName") String oldFolderName, @Param("newFolderName") String newFolderName);
 }
+

@@ -68,4 +68,27 @@ public class CloudController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("An error occurred: " + ex.getMessage());
     }
+    // 폴더 이름 변경
+    @Operation(summary = "폴더 이름 변경", description = "지정된 폴더의 이름을 변경합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "폴더 이름 변경 성공"),
+            @ApiResponse(responseCode = "404", description = "폴더를 찾을 수 없음"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
+    @PatchMapping("/folder/rename")
+    public ResponseEntity<String> renameFolder(
+            @RequestParam String oldFolderName,
+            @RequestParam String newFolderName) {
+        try {
+            boolean isRenamed = cloudService.renameFolder(oldFolderName, newFolderName);
+            if (isRenamed) {
+                return ResponseEntity.ok("Folder renamed successfully.");
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Folder rename failed.");
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
+    }
+
+
 }

@@ -13,28 +13,41 @@ public class CloudEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // 고유 식별자
 
     @Column(nullable = false)
-    private String filename;
+    private String filename; // 파일 이름
 
     @Column(nullable = false)
-    private long fileSize;
+    private long fileSize; // 파일 크기
 
     @Column(nullable = false)
-    private String filePath;
+    private String filePath; // 파일 경로
 
     @Column(nullable = false)
-    private String folderName;
+    private String folderName; // 폴더 이름
 
     @Column(nullable = false)
-    private Long userId; // 사용자 ID 추가
+    private Long userId; // 사용자 ID
 
     @Column(nullable = false)
-    // 파일 삭제 여부를 나타내는 플래그입니다. 기본값은 false입니다.
-    private boolean isDeleted = false; // 삭제 여부
+    private boolean isDeleted = false; // 삭제 여부, 기본값 false
 
-    // 파일이 삭제된 시간을 기록하는 필드입니다.
-    // 삭제 시간이 null이 아닌 경우, 파일은 삭제된 상태로 간주됩니다.
-    private LocalDateTime deletedAt; // 삭제된 시간
+    private LocalDateTime deletedAt; // 삭제된 시간 (null이면 삭제되지 않은 상태)
+
+    /**
+     * 파일 삭제 상태를 설정하고 삭제 시간을 기록하는 메서드입니다.
+     */
+    public void markAsDeleted() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 파일 복원 상태를 설정하고 삭제 시간을 초기화하는 메서드입니다.
+     */
+    public void restore() {
+        this.isDeleted = false;
+        this.deletedAt = null;
+    }
 }
