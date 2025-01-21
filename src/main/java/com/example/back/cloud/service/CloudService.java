@@ -131,4 +131,26 @@ public class CloudService {
             throw new RuntimeException("Failed to rename folder: " + e.getMessage(), e);
         }
     }
+
+    // 파일 이름 변경 메서드
+    @Transactional
+    public boolean renameFile(Long fileId, String newName) {
+        // 파일 조회
+        CloudEntity fileEntity = cloudRepository.findById(fileId)
+                .orElseThrow(() -> new RuntimeException("File not found for ID: " + fileId));
+
+        // 새 이름이 기존 파일 이름과 동일하면 변경하지 않음
+        if (fileEntity.getFilename().equals(newName)) {
+            throw new IllegalArgumentException("새 파일 이름이 기존 이름과 동일합니다.");
+        }
+
+        // 파일 이름 변경
+        try {
+            fileEntity.setFilename(newName);
+            cloudRepository.save(fileEntity);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("파일 이름 변경 실패: " + e.getMessage(), e);
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.example.back.cloud.repository;
 
 import com.example.back.entity.CloudEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -48,7 +49,16 @@ public interface CloudRepository extends JpaRepository<CloudEntity, Long> {
      * @param oldFolderName 기존 폴더 이름
      * @param newFolderName 새 폴더 이름
      */
+    @Modifying
     @Query("UPDATE CloudEntity c SET c.folderName = :newFolderName WHERE c.folderName = :oldFolderName")
     void updateFolderName(@Param("oldFolderName") String oldFolderName, @Param("newFolderName") String newFolderName);
-}
 
+    /**
+     * 파일 이름 변경
+     * @param fileId 변경할 파일의 ID
+     * @param newFileName 새 파일 이름
+     */
+    @Modifying
+    @Query("UPDATE CloudEntity c SET c.filename = :newFileName WHERE c.id = :fileId")
+    void updateFileName(@Param("fileId") Long fileId, @Param("newFileName") String newFileName);
+}

@@ -23,18 +23,29 @@ public class CloudDto {
     @Size(min = 1, max = 50, message = "상태 값은 1자 이상, 50자 이하로 입력해야 합니다.")
     private String status; // 파일 상태 (e.g., "Available", "Deleted")
 
-    // 기본 생성자
+    /**
+     * 기본 생성자
+     * - JSON 역직렬화 시 기본 생성자가 필요합니다.
+     */
     public CloudDto() {
     }
 
-    // 모든 필드를 포함한 생성자
+    /**
+     * 모든 필드를 포함한 생성자
+     * @param filename 파일 이름
+     * @param fileSize 파일 크기
+     * @param status 파일 상태
+     */
     public CloudDto(String filename, long fileSize, String status) {
         this.filename = filename;
         this.fileSize = fileSize;
         this.status = status;
     }
 
-    // 디버깅을 위한 toString 메서드
+    /**
+     * 디버깅 또는 로깅을 위한 toString 메서드
+     * @return 객체의 문자열 표현
+     */
     @Override
     public String toString() {
         return "CloudDto{" +
