@@ -32,27 +32,38 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // 회원가입
+    /**
+     * 회원가입
+     * @param signupDTO 회원가입 요청 데이터
+     * @return 성공 또는 실패 메시지
+     */
     public String signup(SignupDTO signupDTO) {
         logger.info("회원가입 요청 처리 시작: {}", signupDTO.getUserEmail());
 
+        // 이메일 중복 확인
         if (userRepository.existsByUserEmail(signupDTO.getUserEmail())) {
             logger.warn("회원가입 실패: 이미 존재하는 이메일 - {}", signupDTO.getUserEmail());
             return "이미 존재하는 이메일입니다.";
         }
 
+        // 비밀번호 암호화 후 사용자 생성
         String encodedPassword = passwordEncoder.encode(signupDTO.getUserPassword());
         User newUser = new User();
         newUser.setUserName(signupDTO.getUserName());
         newUser.setUserPassword(encodedPassword);
         newUser.setUserEmail(signupDTO.getUserEmail());
 
+        // 사용자 저장
         userRepository.save(newUser);
         logger.info("회원가입 성공: {}", signupDTO.getUserEmail());
         return "회원가입이 성공적으로 완료되었습니다.";
     }
 
-    // 로그인
+    /**
+     * 로그인
+     * @param loginDTO 로그인 요청 데이터
+     * @return 성공 또는 실패 메시지
+     */
     public String login(LoginDTO loginDTO) {
         logger.info("로그인 요청 처리 시작: {}", loginDTO.getUserEmail());
 
@@ -63,6 +74,7 @@ public class UserService {
         }
 
         User user = optionalUser.get();
+        // 비밀번호 검증
         if (passwordEncoder.matches(loginDTO.getUserPassword(), user.getUserPassword())) {
             logger.info("로그인 성공: {}", loginDTO.getUserEmail());
             return "로그인 성공";
@@ -72,7 +84,11 @@ public class UserService {
         }
     }
 
-    // 회원정보 조회
+    /**
+     * 회원정보 조회
+     * @param userEmail 조회할 사용자의 이메일
+     * @return 사용자 프로필 정보
+     */
     public UserProfileDTO getProfile(String userEmail) {
         logger.info("회원정보 조회 요청: {}", userEmail);
 
@@ -82,16 +98,20 @@ public class UserService {
                     return new RuntimeException("사용자를 찾을 수 없습니다.");
                 });
 
+        // User 엔티티를 DTO로 변환
         UserProfileDTO userProfileDTO = new UserProfileDTO();
         userProfileDTO.setUserEmail(user.getUserEmail());
         userProfileDTO.setUserName(user.getUserName());
-        userProfileDTO.setUserPassword(user.getUserPassword());
 
         logger.info("회원정보 조회 성공: {}", userEmail);
         return userProfileDTO;
     }
 
-    // 회원정보 수정
+    /**
+     * 회원정보 수정
+     * @param userUpdateDTO 수정 요청 데이터
+     * @return 성공 또는 실패 메시지
+     */
     public String updateProfile(UserUpdateDTO userUpdateDTO) {
         logger.info("회원정보 수정 요청: {}", userUpdateDTO.getUserEmail());
 
@@ -101,6 +121,7 @@ public class UserService {
                     return new RuntimeException("사용자를 찾을 수 없습니다.");
                 });
 
+        // 이름과 비밀번호 업데이트
         if (userUpdateDTO.getUserName() != null) {
             user.setUserName(userUpdateDTO.getUserName());
         }
@@ -113,7 +134,11 @@ public class UserService {
         return "회원정보 수정이 완료되었습니다.";
     }
 
-    // 회원 탈퇴 (30일 대기)
+    /**
+     * 회원 탈퇴 (30일 대기 상태로 변경)
+     * @param userEmail 탈퇴 요청할 사용자 이메일
+     * @return 성공 또는 실패 메시지
+     */
     public String deleteAccount(String userEmail) {
         logger.info("회원 탈퇴 요청: {}", userEmail);
 
@@ -123,6 +148,7 @@ public class UserService {
                     return new RuntimeException("사용자를 찾을 수 없습니다.");
                 });
 
+        // 삭제 상태로 전환
         user.setDeleted(true);
         user.setDeletedAt(LocalDateTime.now());
         userRepository.save(user);
@@ -131,7 +157,9 @@ public class UserService {
         return "회원탈퇴가 요청되었으며, 30일 후에 계정이 영구 삭제됩니다.";
     }
 
-    // 30일 이상 된 계정 삭제 (스케줄러)
+    /**
+     * 30일 이상 경과한 계정 삭제 (스케줄러)
+     */
     @Scheduled(cron = "0 0 0 * * ?") // 매일 자정 실행
     public void deleteScheduledAccounts() {
         LocalDateTime thresholdDate = LocalDateTime.now().minusDays(30);
